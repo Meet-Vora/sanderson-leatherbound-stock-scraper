@@ -9,7 +9,7 @@ from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-from data_wrapper import get_from_email, get_to_email
+from data_wrapper import get_email
 
 # If modifying these scopes, delete the file token_emailer.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.compose',
@@ -39,6 +39,7 @@ def send_email(content_listings):
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 'client_secret.json', SCOPES)
+            # flow.redirect_uri = 'http://localhost:59344/'
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token_emailer.pickle', 'wb') as token:
@@ -52,8 +53,8 @@ def send_email(content_listings):
         for listing in content_listings:
             email_message += str(listing) + "\n\n"
         message.set_content(email_message)
-        message['To'] = get_to_email()
-        message['From'] = get_from_email()
+        message['To'] = get_email()
+        message['From'] = get_email()
         message['Subject'] = "Refurbished M2 Macbook Listings"
 
         # encoded message
