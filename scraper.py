@@ -19,19 +19,27 @@ def scrape_leatherbound_books():
 
         data = []
         report_in_stock = False
+        title_in_stock = ''
         for book in all_leatherbounds:
-            book_info = {
+            book_data = {
                 'title': book.div.find('div', class_='product-card__details').a.text.strip(), 
                 'link': BASE_URL + book.div.find('div', class_='product-card__details').a['href'],
                 'price': book.div.find('span', class_='money').text,
                 'in_stock': book.select("[class*=product-card__label]") == []
             }
+            book_info = """Title: {0}
+In Stock: {1}
+Price: {2}
+Link: {3}""".format(book_data['title'], book_data['in_stock'], book_data['price'], book_data['link'])
             data.append(book_info)
-            if book_info['title'] in BOOKS_TO_ALERT_FOR and book_info['in_stock']:
+            
+            if book_data['title'] in BOOKS_TO_ALERT_FOR and book_data['in_stock']:
                 report_in_stock = True
+                title_in_stock = book_data['title']
 
         if report_in_stock:
-            emailer.send_email(data)
+            email_subject = '[URGENT] LEATHERBOUNDS IN STOCK!!! Dragonsteel Leatherbound Book(s) Available: {}'.format(title_in_stock)
+            emailer.send_email(data, email_subject)
         else:
             # sleep for EXECUTION_INTERVAL_IN_MINUTES minutes if not in stock
             print("SLEEPING #", counter)

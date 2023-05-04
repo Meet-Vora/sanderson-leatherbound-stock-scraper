@@ -15,7 +15,7 @@ from data_wrapper import get_email
 SCOPES = ['https://www.googleapis.com/auth/gmail.compose',
           'https://www.googleapis.com/auth/gmail.send']
 
-def send_email(content_listings):
+def send_email(content_listings, subject):
     """Create and send an email message
     Print the returned  message id
     Returns: Message object, including message id
@@ -40,7 +40,7 @@ def send_email(content_listings):
             flow = InstalledAppFlow.from_client_secrets_file(
                 'client_secret.json', SCOPES)
             # flow.redirect_uri = 'http://localhost:59344/'
-            creds = flow.run_local_server(port=0)
+            creds = flow.run_local_server(port=59344)
         # Save the credentials for the next run
         with open('token_emailer.pickle', 'wb') as token:
             pickle.dump(creds, token)
@@ -55,7 +55,7 @@ def send_email(content_listings):
         message.set_content(email_message)
         message['To'] = get_email()
         message['From'] = get_email()
-        message['Subject'] = "Refurbished M2 Macbook Listings"
+        message['Subject'] = subject
 
         # encoded message
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()) \
@@ -64,7 +64,7 @@ def send_email(content_listings):
         # create and send message
         create_message = { 'raw': encoded_message }
         send_message = (service.users().messages().send(userId="me", body=create_message).execute())
-        print('Message Id: {send_message["id"]}')
+        print('Message Id: {}'.format(send_message["id"]))
 
     except HttpError as error:
         print('An error occurred: {error}')
